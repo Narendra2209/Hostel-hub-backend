@@ -69,11 +69,32 @@ export function dateRange(from?: string, to?: string): Prisma.DateTimeFilter | u
   };
 }
 
+/**
+ * Escape every regular-expression metacharacter in a search term.
+ *
+ * Prisma's MongoDB connector compiles `contains` into `$regexMatch` and passes
+ * the string through UNESCAPED, so whatever a user types in a search box is
+ * evaluated as a pattern by the database. Two consequences, both reachable by
+ * any signed-in user:
+ *
+ *   - Searching for a name containing a bracket - "Owner) signed" - is not a
+ *     valid regex, and MongoDB fails the query with error 51111. The user sees
+ *     a 500 for typing an ordinary character.
+ *   - A pattern such as `(a+)+$` backtracks catastrophically, and it does so
+ *     inside the database server, on every scanned document. That is a
+ *     denial-of-service anyone with a login can trigger from a text box.
+ *
+ * Escaping makes the term mean exactly what was typed, which is also what a
+ * user expects a search box to do.
+ */
+export const escapeRegExp = (term: string): string =>
+  term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /** Case-insensitive contains filter, or undefined when the search box is empty. */
 export function searchFilter(search?: string): Prisma.StringFilter | undefined {
   const term = search?.trim();
   if (!term) return undefined;
-  return { contains: term, mode: 'insensitive' };
+  return { contains: escapeRegExp(term), mode: 'insensitive' };
 }
 
 /** The first day of a month as a Date, for writing a billingMonth column. */

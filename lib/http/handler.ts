@@ -19,6 +19,7 @@ import { AppError, InternalError, ValidationError, isAppError } from '../errors/
 import { failure } from './response';
 import { preflightResponse } from './headers';
 import { logger, requestId } from './logger';
+import { recordTiming } from './metrics';
 import { clientKey, enforceRateLimit } from './rate-limit';
 
 /** Next.js 15 hands route params in asynchronously. */
@@ -151,14 +152,20 @@ export function defineRoute<TParams = Record<string, string>>(
       const params = await resolveParams<TParams>(segment);
       const response = await handler({ request, params, auth, origin, requestId: id });
 
+      const durationMs = Date.now() - startedAt;
+
       logger.info('Request completed', {
         requestId: id,
         method: request.method,
         path: new URL(request.url).pathname,
         status: response.status,
-        durationMs: Date.now() - startedAt,
+        durationMs,
         userId: auth.userId || undefined,
       });
+
+      // Feeds the per-route timings on the diagnostics screen. recordTiming
+      // normalises the path itself (ids become :id) and never throws.
+      recordTiming(`${request.method} ${new URL(request.url).pathname}`, durationMs);
 
       return response;
     } catch (error) {

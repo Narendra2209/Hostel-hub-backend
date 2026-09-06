@@ -18,6 +18,7 @@ import { prisma, type PrismaLike } from '../db/prisma';
 import { expenseInclude, type ExpenseWithRelations } from '../services/mappers';
 import {
   dateRange,
+  escapeRegExp,
   monthDateRange,
   nullableBuildingWhere,
   type BuildingFilter,
@@ -40,9 +41,14 @@ export interface ExpenseFilters {
   search?: string;
 }
 
-/** Case-insensitive contains, typed so it fits nullable and non-null columns alike. */
+/**
+ * Case-insensitive contains, typed so it fits nullable and non-null columns
+ * alike. The term is escaped: Prisma's MongoDB connector treats `contains` as a
+ * regular expression, so an unescaped bracket from a search box is a 500 and an
+ * unescaped `(a+)+$` is a denial of service. See escapeRegExp in filters.ts.
+ */
 const containsText = (term: string): { contains: string; mode: 'insensitive' } => ({
-  contains: term,
+  contains: escapeRegExp(term),
   mode: 'insensitive',
 });
 

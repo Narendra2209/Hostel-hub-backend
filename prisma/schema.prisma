@@ -371,6 +371,15 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@index([userId])
+  /*
+   * The activity screen always sorts by createdAt, so MongoDB prefers the
+   * [createdAt] index and applies any other filter as a residual scan. Measured
+   * on a 2,008-row collection: filtering by entityType examined every document
+   * to return one. These two compound indexes make the sort and the filter the
+   * same index, so documents examined equals rows returned.
+   */
+  @@index([entityType, createdAt])
+  @@index([userId, createdAt])
   @@map("audit_logs")
 }
 
