@@ -1,0 +1,65 @@
+{
+  "name": "hostel-hub-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 4000",
+    "build": "npm run build:shared && prisma generate && next build",
+    "start": "next start --port 4000",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "npm run build:shared && tsc --noEmit",
+    "test": "npm run build:shared && vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "import:legacy": "tsx scripts/import-legacy-data.ts",
+    "seed:scale": "tsx scripts/seed-scale-data.ts",
+    "prisma:push": "prisma db push",
+    "prisma:reset": "prisma db push --force-reset",
+    "reset:data": "tsx scripts/reset-business-data.ts",
+    "build:shared": "npm run build --workspace @hostel/shared",
+    "test:shared": "npm run test --workspace @hostel/shared",
+    "cdk": "npm run cdk --workspace @hostel/infrastructure",
+    "deploy:infra": "npm run deploy --workspace @hostel/infrastructure",
+    "db:up": "docker compose up -d mongo",
+    "db:down": "docker compose down"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.717.0",
+    "@hostel/shared": "*",
+    "@prisma/client": "^6.2.1",
+    "jose": "^6.2.12",
+    "mongodb": "^7.6.0",
+    "next": "^15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "@vitest/coverage-v8": "^3.0.5",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.1.4",
+    "prisma": "^6.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.7"
+  },
+  "description": "Hostel Manager - Next.js API, Prisma/MongoDB, AWS CDK",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "shared",
+    "infrastructure"
+  ]
+}

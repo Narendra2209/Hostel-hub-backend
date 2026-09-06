@@ -1,0 +1,51 @@
+services:
+  # Local MongoDB for development.
+  #
+  # Configured as a SINGLE-NODE REPLICA SET, not a standalone server. That is not
+  # optional: the application writes each mutation and its audit row in one
+  # multi-document transaction, and MongoDB only offers transactions on a replica
+  # set or a sharded cluster. A plain `mongod` would fail every write path.
+  #
+  # MongoDB Atlas is always a replica set, so production needs nothing special.
+  mongo:
+    image: mongo:8
+    container_name: hostel-mongo
+    restart: unless-stopped
+    command: ['--replSet', 'rs0', '--bind_ip_all', '--port', '27017']
+    ports:
+      - '27017:27017'
+    volumes:
+      - hostel_mongo:/data/db
+    healthcheck:
+      # Initiates the replica set on first boot, then reports healthy once the
+      # node has actually been elected primary.
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}).ok }
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
+
+  # Optional web UI for poking at the data during development.
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: hostel-mongo-express
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - '8081:8081'
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      ME_CONFIG_BASICAUTH: 'false'
+    profiles:
+      # Started only with `docker compose --profile tools up`, so the default
+      # `npm run db:up` stays lean.
+      - tools
+
+volumes:
+  hostel_mongo:

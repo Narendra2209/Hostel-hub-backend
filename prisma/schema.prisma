@@ -1,0 +1,445 @@
+// Hostel Manager - MongoDB schema.
+//
+// Design notes, and what changed moving off PostgreSQL:
+//
+//  * MONEY IS INTEGER PAISE. Prisma's MongoDB connector has no Decimal type, so
+//    every amount is stored as a whole number of paise (Rs 4,500.00 -> 450000).
+//    Integer arithmetic is exact, which is a stronger guarantee than the
+//    NUMERIC(14,2) it replaces; rupees appear only at the API boundary, where
+//    lib/db/money.ts converts. See that file for the conversion rules.
+//
+//  * DATES ARE UTC-MIDNIGHT DateTimes. MongoDB has no date-only type. A billing
+//    month is the first instant of that month in UTC, a calendar date is that
+//    day at 00:00:00Z. packages/shared/src/date.ts already constructed them that
+//    way, so the semantics are unchanged.
+//
+//  * NO FOREIGN KEYS. MongoDB cannot enforce referential integrity, so rules
+//    like "a building with residents cannot be deleted" are enforced in the
+//    service layer only - see building.service.ts. Losing the database-level
+//    backstop is the real cost of this move and is called out in the README.
+//
+//  * No `outstandingBalance` field exists anywhere. Balances are always derived
+//    from the payment ledger so they cannot drift out of sync.
+//
+//  * Financial history is never destroyed: residents and staff are archived
+//    (active = false), never removed while transactions reference them.
+//
+// Schema changes are applied with `prisma db push` (MongoDB has no migration
+// files); the command also creates the indexes declared below.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  /// Support role: full create/update access plus the activity log and
+  /// diagnostics, but deliberately cannot change settings or grant roles.
+  DEVELOPER
+  MANAGER
+  VIEWER
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  BANK_TRANSFER
+  CARD
+  CHEQUE
+  OTHER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  ARCHIVE
+  RESTORE
+  MOVE
+  LOGIN
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_REPORTER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TicketCategory {
+  BUG
+  DATA_ISSUE
+  ACCESS
+  QUESTION
+  FEATURE_REQUEST
+  OTHER
+}
+
+enum AuditEntityType {
+  RESIDENT
+  BUILDING
+  FEE_PAYMENT
+  STAFF
+  SALARY_PAYMENT
+  EXPENSE
+  EXPENSE_CATEGORY
+  SETTINGS
+  USER
+  SESSION
+  TICKET
+}
+
+/// An application user. Passwords are scrypt hashes (see lib/auth/password.ts,
+/// which explains why scrypt rather than argon2) - the plaintext never
+/// touches the database, a log, or an audit payload.
+model User {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  /// Stored lowercased; the unique index makes sign-in case-insensitive.
+  email               String    @unique
+  passwordHash        String
+  role                UserRole  @default(VIEWER)
+  active              Boolean   @default(true)
+  /// Forces a password change on next sign-in (set for invited accounts).
+  mustChangePassword  Boolean   @default(false)
+  /// Bumped on password change / forced sign-out; tokens issued before this
+  /// instant are rejected, which is how "log everyone out" works without
+  /// server-side session storage.
+  tokenValidFrom      DateTime  @default(now())
+  failedLoginAttempts Int       @default(0)
+  /// Set when repeated failures lock the account; cleared on success.
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  auditLogs       AuditLog[]
+  feePayments     FeePayment[]
+  salaryPayments  SalaryPayment[]
+  expenses        Expense[]
+  ticketsRaised   Ticket[]        @relation("TicketsRaised")
+  ticketsAssigned Ticket[]        @relation("TicketsAssigned")
+  ticketComments  TicketComment[]
+
+  @@index([role])
+  @@index([active])
+  @@map("users")
+}
+
+/// Single-document configuration. `singleton` is a unique constant, so a second
+/// document is impossible even under a race between two cold Lambdas.
+model HostelSettings {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  singleton     Boolean  @unique @default(true)
+  hostelName    String   @default("Hostel Manager")
+  /// Non-ASCII default deliberately omitted; DEFAULT_CURRENCY_SYMBOL in
+  /// @hostel/shared supplies it when the document is first created.
+  currency      String
+  currencyCode  String   @default("INR")
+  defaultDueDay Int      @default(5)
+  timezone      String   @default("Asia/Kolkata")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("hostel_settings")
+}
+
+model Building {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  code      String?  @unique
+  address   String?
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  residents Resident[]
+  staff     Staff[]
+  expenses  Expense[]
+  movesFrom ResidentBuildingHistory[] @relation("MoveFromBuilding")
+  movesTo   ResidentBuildingHistory[] @relation("MoveToBuilding")
+
+  @@index([active, sortOrder])
+  @@map("buildings")
+}
+
+/// Categories are documents, not a hardcoded enum, so new ones can be added at
+/// runtime. The eight defaults are created idempotently on first read.
+model ExpenseCategory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String   @unique
+  name      String   @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(500)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses Expense[]
+
+  @@index([active, sortOrder])
+  @@map("expense_categories")
+}
+
+model Resident {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  phone      String?
+  email      String?
+  buildingId String @db.ObjectId
+  /// Monthly rent in PAISE.
+  monthlyFee Int
+  dueDay     Int
+  /// First day of the joining month, at UTC midnight. Rent is charged from
+  /// this month onwards.
+  joinDate   DateTime
+  /// Last day of the vacating month at UTC midnight, or null while staying.
+  /// Rent is charged up to and including that month.
+  vacatedDate DateTime?
+  /// false = archived (soft delete). Payment history is always retained.
+  active      Boolean   @default(true)
+  notes       String?
+  /// GridFS file ids in the `documents` bucket. Never a public URL.
+  photoFileId   String? @db.ObjectId
+  aadhaarFileId String? @db.ObjectId
+  archivedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  building        Building                  @relation(fields: [buildingId], references: [id])
+  payments        FeePayment[]
+  buildingHistory ResidentBuildingHistory[]
+
+  @@index([buildingId])
+  @@index([active])
+  @@index([buildingId, active])
+  @@index([name])
+  @@index([joinDate])
+  @@index([vacatedDate])
+  @@map("residents")
+}
+
+model ResidentBuildingHistory {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  residentId     String   @db.ObjectId
+  fromBuildingId String?  @db.ObjectId
+  toBuildingId   String   @db.ObjectId
+  effectiveDate  DateTime
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  resident     Resident  @relation(fields: [residentId], references: [id])
+  fromBuilding Building? @relation("MoveFromBuilding", fields: [fromBuildingId], references: [id])
+  toBuilding   Building  @relation("MoveToBuilding", fields: [toBuildingId], references: [id])
+
+  @@index([residentId, effectiveDate])
+  @@map("resident_building_history")
+}
+
+/// One document per money-in transaction. Several payments may target the same
+/// billing month; nothing is ever overwritten to record a top-up.
+model FeePayment {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  residentId String @db.ObjectId
+  /// First instant of the month this payment settles - not necessarily the
+  /// month the money arrived in.
+  billingMonth    DateTime
+  /// Amount in PAISE.
+  amount          Int
+  paymentDate     DateTime
+  paymentMethod   PaymentMethod @default(CASH)
+  referenceNumber String?
+  note            String?
+  createdById     String?       @db.ObjectId
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  resident  Resident @relation(fields: [residentId], references: [id])
+  createdBy User?    @relation(fields: [createdById], references: [id])
+
+  @@index([residentId, billingMonth])
+  @@index([billingMonth])
+  @@index([paymentDate])
+  @@index([residentId])
+  @@map("fee_payments")
+}
+
+model Staff {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  phone  String?
+  role   String?
+  /// null means the member works across every building (a shared cost).
+  buildingId String? @db.ObjectId
+  /// Monthly salary in PAISE.
+  monthlySalary Int
+  active        Boolean   @default(true)
+  joinDate      DateTime?
+  endDate       DateTime?
+  notes         String?
+  archivedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  building Building?       @relation(fields: [buildingId], references: [id])
+  payments SalaryPayment[]
+
+  @@index([buildingId])
+  @@index([active])
+  @@index([name])
+  @@map("staff")
+}
+
+model SalaryPayment {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  staffId String @db.ObjectId
+  /// First instant of the salary month being settled.
+  salaryMonth DateTime
+  /// Amount in PAISE.
+  amount        Int
+  paymentDate   DateTime
+  paymentMethod PaymentMethod @default(CASH)
+  note          String?
+  createdById   String?       @db.ObjectId
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  staff     Staff @relation(fields: [staffId], references: [id])
+  createdBy User? @relation(fields: [createdById], references: [id])
+
+  @@index([staffId, salaryMonth])
+  @@index([salaryMonth])
+  @@index([paymentDate])
+  @@map("salary_payments")
+}
+
+model Expense {
+  id   String   @id @default(auto()) @map("_id") @db.ObjectId
+  date DateTime
+  /// null means a shared cost that has not been attributed to one building.
+  buildingId String? @db.ObjectId
+  categoryId String  @db.ObjectId
+  /// Amount in PAISE.
+  amount          Int
+  vendor          String?
+  referenceNumber String?
+  note            String?
+  createdById     String?  @db.ObjectId
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  building  Building?       @relation(fields: [buildingId], references: [id])
+  category  ExpenseCategory @relation(fields: [categoryId], references: [id])
+  createdBy User?           @relation(fields: [createdById], references: [id])
+
+  @@index([date])
+  @@index([buildingId, date])
+  @@index([categoryId, date])
+  @@map("expenses")
+}
+
+/// Append-only trail for financial, administrative and sign-in events.
+model AuditLog {
+  id         String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?         @db.ObjectId
+  action     AuditAction
+  entityType AuditEntityType
+  entityId   String
+  summary    String?
+  oldData    Json?
+  newData    Json?
+  createdAt  DateTime        @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+/// A support ticket. Anyone signed in can raise one; the DEVELOPER and OWNER
+/// roles work them. Reporters only ever see their own.
+model Ticket {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  /// Human-facing handle, e.g. TKT-000042. Allocated atomically - see Counter.
+  reference   String         @unique
+  title       String
+  description String
+  category    TicketCategory @default(QUESTION)
+  priority    TicketPriority @default(NORMAL)
+  status      TicketStatus   @default(OPEN)
+
+  raisedById   String  @map("raised_by") @db.ObjectId
+  assignedToId String? @map("assigned_to") @db.ObjectId
+
+  /// Where the reporter was when they raised it. Enormously useful for
+  /// reproducing a problem, and captured automatically rather than asked for.
+  pageUrl   String?
+  userAgent String?
+
+  resolvedAt DateTime?
+  closedAt   DateTime?
+  /// Bumped by any comment or status change, so a queue can sort by staleness
+  /// without a per-row lookup into the comments collection.
+  lastActivityAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  raisedBy   User            @relation("TicketsRaised", fields: [raisedById], references: [id])
+  assignedTo User?           @relation("TicketsAssigned", fields: [assignedToId], references: [id])
+  comments   TicketComment[]
+
+  @@index([status, lastActivityAt])
+  @@index([raisedById, createdAt])
+  @@index([assignedToId, status])
+  @@index([priority, status])
+  @@map("tickets")
+}
+
+model TicketComment {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  ticketId String  @map("ticket_id") @db.ObjectId
+  authorId String? @map("author_id") @db.ObjectId
+  body     String
+  /// Internal notes are visible only to those who can manage tickets - never
+  /// returned to the reporter.
+  internal Boolean @default(false)
+  /// True for entries the system wrote itself (status changed, reassigned),
+  /// so the UI can render them differently from a person's reply.
+  systemNote Boolean @default(false)
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+  author User?  @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_comments")
+}
+
+/// Atomic sequence allocation. MongoDB has no SERIAL, and counting existing
+/// rows would hand two concurrent reporters the same reference, so the number
+/// comes from a single-document $inc.
+model Counter {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  key   String @unique
+  value Int    @default(0)
+
+  @@map("counters")
+}

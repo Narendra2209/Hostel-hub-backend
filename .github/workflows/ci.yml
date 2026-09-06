@@ -1,0 +1,187 @@
+# Continuous integration for the Hostel Hub backend.
+#
+# Deliberately ONE job: every step after `npm ci` reuses the same node_modules,
+# the same generated Prisma client and the same MongoDB instance. Splitting
+# lint/typecheck/test/build into parallel jobs would mean re-running `npm ci`
+# (~1 min) and `prisma generate` in each of them, which costs more than the
+# parallelism buys on a repo this size. If the suite ever grows past ~15
+# minutes, split it then and make the `needs:` edges explicit.
+#
+# WHY MONGODB IS STARTED WITH `docker run` AND NOT AS A `services:` CONTAINER
+#
+# The application writes each mutation and its audit row in one multi-document
+# transaction, and MongoDB offers transactions only on a replica set. So the
+# test database has to be a single-node replica set, which means starting mongod
+# with `--replSet rs0` - a *command argument*, passed after the image name.
+#
+# GitHub's `services:` block cannot express that. The runner builds its
+# `docker create` line as `docker create <options> <image>` and appends nothing
+# after the image, so there is no way to hand mongod any arguments; `options:`
+# only accepts flags that belong before the image. A service container would
+# therefore give us a standalone mongod, and every write path in the integration
+# suite would fail with "Transactions are not supported".
+#
+# Starting the container ourselves also buys the second thing a service
+# container cannot do: run `rs.initiate(...)` and block until the node has
+# actually been elected primary. A freshly initiated replica set member is not
+# writable for a second or two, and tests that start inside that window fail
+# intermittently.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# A newer commit on the same branch makes an in-flight run obsolete.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only: CI never deploys and never needs a token beyond checkout.
+permissions:
+  contents: read
+
+env:
+  # The floor declared in package.json (`engines.node: >=20`). The
+  # Lambda container pins its own Node inside Dockerfile, so this
+  # version only governs lint, tests and the builds run here.
+  NODE_VERSION: '20'
+  # Same major as docker-compose.yml, so a schema that pushes here pushes
+  # against Atlas too.
+  MONGO_IMAGE: 'mongo:8'
+  MONGO_CONTAINER: 'hostel-ci-mongo'
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      # The replica set advertises itself as localhost:27017, which is exactly
+      # what the runner reaches through the published port, so `replicaSet=rs0`
+      # discovery resolves to the single node and transactions are available.
+      DATABASE_URL: mongodb://localhost:27017/hostel_test?replicaSet=rs0
+      # Throwaway. lib/env.ts requires at least 32 characters; this is not a
+      # production build, nothing signed with it ever leaves the runner, and it
+      # must never be reused anywhere real.
+      JWT_SECRET: ci-throwaway-signing-key-not-a-real-secret-do-not-reuse
+      SESSION_TTL_HOURS: '12'
+      # Leave the runner on UTC. The app resolves "today" in Asia/Kolkata itself
+      # (shared/src/date.ts); a UTC runner is the honest test of that.
+      TZ: UTC
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # Started before `npm ci` so the election completes while npm works.
+      # --bind_ip_all because mongod otherwise listens on the container's
+      # loopback only and the published port would go nowhere.
+      - name: Start MongoDB as a single-node replica set
+        run: |
+          set -euo pipefail
+          docker run --detach \
+            --name "${MONGO_CONTAINER}" \
+            --publish 27017:27017 \
+            "${MONGO_IMAGE}" \
+            --replSet rs0 --bind_ip_all --port 27017
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Two waits, and both are needed. The first is for mongod to accept
+      # connections at all; the second is for the replica set to elect a
+      # primary, which happens a beat *after* rs.initiate returns ok. Writing
+      # inside that beat is the classic intermittent CI failure.
+      - name: Initiate the replica set and wait for a primary
+        run: |
+          set -euo pipefail
+
+          echo "Waiting for mongod to accept connections..."
+          for _ in $(seq 1 30); do
+            if docker exec "${MONGO_CONTAINER}" mongosh --quiet \
+                 --eval 'db.adminCommand({ ping: 1 }).ok' >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+
+          # Idempotent: against an already-initiated set rs.status() succeeds
+          # and nothing happens, so re-running this step cannot fail with
+          # AlreadyInitialized.
+          docker exec "${MONGO_CONTAINER}" mongosh --quiet --eval '
+            try { rs.status().ok }
+            catch (e) { rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "localhost:27017" }] }).ok }
+          '
+
+          echo "Waiting for the node to become primary..."
+          for _ in $(seq 1 30); do
+            primary=$(docker exec "${MONGO_CONTAINER}" mongosh --quiet \
+                        --eval 'db.hello().isWritablePrimary' 2>/dev/null | tr -d '[:space:]' || true)
+            if [ "${primary}" = "true" ]; then
+              echo "Replica set rs0 is primary and accepting writes."
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "MongoDB never became primary. Container log follows:" >&2
+          docker logs "${MONGO_CONTAINER}" >&2
+          exit 1
+
+      # @hostel/shared compiles to real .js that both apps import through their
+      # package exports; nothing else typechecks or builds until dist/ exists.
+      - name: Build shared package
+        run: npm run build:shared
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      # MongoDB has no migration files and no migration history collection, so
+      # there is nothing to "deploy": `prisma db push` diffs schema.prisma
+      # against the live database and creates the collections and the declared
+      # indexes. The integration suite needs those indexes - a unique constraint
+      # *is* an index on MongoDB, so without this step the duplicate-rejection
+      # cases would quietly pass by inserting duplicates.
+      - name: Apply the schema to the test database
+        run: npm run db:push
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # vitest.config.ts excludes the integration specs from this run.
+      - name: Unit tests
+        run: npm test
+
+      # The integration specs live in tests/integration/*.int.test.ts
+      # and are excluded from the default `vitest run` because they need a real
+      # replica set. vitest.integration.config.ts includes only those
+      # files; it reads connection details from a gitignored .env.local when one
+      # exists, and a variable already present in the environment always wins -
+      # which is how DATABASE_URL and JWT_SECRET above reach the suite here.
+      - name: Integration tests (against the MongoDB replica set)
+        run: npm run test:integration
+
+      - name: Build
+        run: npm run build
+
+      # The CDK stacks are TypeScript too, and a type error there is only found
+      # at deploy time otherwise.
+      - name: Typecheck the infrastructure
+        run: npm run typecheck --workspace @hostel/infrastructure
+
+      - name: Stop MongoDB
+        if: always()
+        run: docker rm --force "${MONGO_CONTAINER}" >/dev/null 2>&1 || true

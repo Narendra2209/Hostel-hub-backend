@@ -1,0 +1,7 @@
+# Normalise line endings so the repository stays LF regardless of who commits
+# from Windows.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
