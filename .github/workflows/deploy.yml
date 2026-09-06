@@ -73,7 +73,7 @@ jobs:
 
       - name: Configure AWS credentials
         # OIDC role assumption - short-lived credentials, no stored access keys.
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
