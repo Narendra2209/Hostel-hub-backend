@@ -930,14 +930,20 @@ const invokedDirectly = (): boolean => {
   return typeof entry === 'string' && /load-test\.(ts|js|mjs)$/.test(entry.replace(/\\/g, '/'));
 };
 
+/** Argument parsing throws synchronously, so it has to be inside the promise. */
+async function main(): Promise<number> {
+  return runLoadTest(parseOptions(process.argv.slice(2)));
+}
+
 if (invokedDirectly()) {
-  runLoadTest(parseOptions(process.argv.slice(2)))
+  main()
     .then((code) => {
       process.exitCode = code;
     })
     .catch((error: unknown) => {
       console.error('');
       console.error(error instanceof Error ? error.message : String(error));
+      console.error('');
       process.exitCode = 1;
     });
 }
