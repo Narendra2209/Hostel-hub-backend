@@ -1,0 +1,208 @@
+# Deploy the API (CDK) and, only when a human asks for it, apply the schema.
+#
+# The two halves are separate jobs on purpose. Shipping code is reversible - the
+# previous Lambda image is still in ECR and a redeploy rolls back. Applying a
+# schema change is not: `prisma db push` reshapes the live database to match
+# schema.prisma, and on MongoDB that means creating and DROPPING indexes, and -
+# if anyone ever passes --accept-data-loss - removing data this system is
+# supposed to keep forever. There is no migration history and no "down", so a
+# push cannot be replayed backwards. It therefore never rides along with a push
+# to main; it needs a dispatch flag AND an approval.
+name: Deploy API
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Which stage to deploy
+        type: choice
+        options: [dev, staging, prod]
+        default: prod
+        required: true
+      apply_schema:
+        description: 'Also run `prisma db push` against Atlas (needs a reviewer to approve)'
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - '**'
+      - 'shared/**'
+      - 'infrastructure/**'
+      - '.github/workflows/deploy-api.yml'
+
+permissions:
+  id-token: write # required to mint the OIDC token for role assumption
+  contents: read
+
+# Serialise deploys per stage; do NOT cancel in flight. Cancelling this workflow
+# does not stop a CloudFormation change set or a half-applied schema push, it
+# only stops us watching - so a second run queues behind the first instead.
+concurrency:
+  group: deploy-api-${{ inputs.stage || 'prod' }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  deploy:
+    name: CDK deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: ${{ inputs.stage || 'prod' }}
+      url: ${{ vars.API_BASE_URL }}
+
+    env:
+      STAGE: ${{ inputs.stage || 'prod' }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        # OIDC role assumption - short-lived credentials, no stored access keys.
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-deploy-api-${{ github.run_id }}
+
+      # What is about to change, in the log, before it changes. `cdk diff`
+      # exits non-zero when a stack differs, which is the normal case here.
+      - name: Diff the API stack
+        working-directory: infrastructure
+        run: npx cdk diff "hostel-${STAGE}-api" -c stage="${STAGE}" -c region="${AWS_REGION}" || true
+
+      # The Lambda is a container image built from Dockerfile with the
+      # monorepo root as context, so the runner's Docker daemon does the build
+      # and CDK pushes the image to ECR. Nothing needs to be prebuilt here.
+      #
+      # CDK also brings up the upstream stacks the API depends on - network and
+      # web (see infrastructure/bin/app.ts) - when they have drifted. There is
+      # no database stack and no auth stack: MongoDB Atlas lives outside this
+      # account and the application manages its own accounts. Add --exclusively
+      # to touch only the API stack once the platform stacks are stable.
+      - name: Deploy the API stack
+        working-directory: infrastructure
+        run: |
+          set -euo pipefail
+          npx cdk deploy "hostel-${STAGE}-api" \
+            --require-approval never \
+            --progress events \
+            -c stage="${STAGE}" \
+            -c region="${AWS_REGION}"
+
+      - name: Summary
+        run: |
+          {
+            echo "### API deployed"
+            echo ""
+            echo "- stage: \`${STAGE}\`"
+            echo "- stack: \`hostel-${STAGE}-api\`"
+            echo "- commit: \`${GITHUB_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  schema:
+    name: Apply the schema to Atlas (manual approval)
+    needs: deploy
+    # Never on a push. Only when someone dispatched the workflow and explicitly
+    # ticked apply_schema, which defaults to false.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_schema }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # This environment must be configured in Settings -> Environments with
+    # "Required reviewers". That is what makes this a gate: the job sits in a
+    # "Waiting" state until a named human approves it, and the approval is
+    # recorded against the run. Without the reviewer setting this workflow is
+    # only flag-guarded, not gated.
+    environment:
+      name: ${{ inputs.stage || 'prod' }}-schema
+
+    env:
+      STAGE: ${{ inputs.stage || 'prod' }}
+      # The Atlas SRV connection string, as a repository/environment secret.
+      # There is no second "direct" URL any more: MongoDB has no proxy in front
+      # of it and no separate DDL connection, so `db push` uses exactly the same
+      # string the running Lambda does.
+      #
+      # NETWORK ACCESS. `prisma db push` connects to Atlas straight from
+      # whatever machine runs it, and Atlas only answers allow-listed addresses
+      # (docs/DEPLOYMENT.md, step 3). A GitHub-hosted runner draws a different
+      # egress IP on every run, so this job WILL time out with a server
+      # selection error against a properly locked-down cluster. Pick one:
+      #
+      #   * Run this job on a self-hosted runner inside the VPC, so it leaves
+      #     through the same NAT Elastic IP the Lambda uses - already allow-
+      #     listed, nothing else to configure. This is the intended setup.
+      #   * Or skip this job entirely and run `npm run db:push` by hand from an
+      #     allow-listed machine, which is what docs/DEPLOYMENT.md describes.
+      #
+      # Opening Atlas to 0.0.0.0/0 so a hosted runner can reach it throws away
+      # the one control that makes a leaked connection string unusable. Do not.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the connection string is configured
+        run: |
+          set -euo pipefail
+          : "${DATABASE_URL:?set the DATABASE_URL secret on the ${STAGE}-schema environment}"
+          case "${DATABASE_URL}" in
+            mongodb://*|mongodb+srv://*) ;;
+            *) echo "DATABASE_URL is not a MongoDB connection string" >&2; exit 1 ;;
+          esac
+
+      # Catches a malformed schema before anything touches the database. There
+      # is no `prisma migrate status` equivalent for MongoDB - no history to
+      # compare against - so this is the only pre-flight check available.
+      - name: Validate the Prisma schema
+        working-directory: .
+        run: npx prisma validate
+
+      # `db push` reconciles the live database with schema.prisma: it creates
+      # collections and the declared indexes, and it drops indexes the schema no
+      # longer declares. It refuses anything it considers data loss unless
+      # --accept-data-loss is passed, which this workflow deliberately does not.
+      #
+      # Prefer expand-then-contract, exactly as with SQL: add the new field,
+      # ship the code that writes both, and remove the old field in a later,
+      # separate release. MongoDB will not delete the old field's data when you
+      # drop it from the schema, so a rollback of the *code* still finds it.
+      - name: Apply the schema (prisma db push)
+        working-directory: .
+        run: npx prisma db push
+
+      - name: Summary
+        run: |
+          {
+            echo "### Schema applied"
+            echo ""
+            echo "- stage: \`${STAGE}\`"
+            echo "- command: \`prisma db push\`"
+            echo "- commit: \`${GITHUB_SHA}\`"
+            echo "- approved by: \`${GITHUB_ACTOR}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

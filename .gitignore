@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Environment / secrets - never commit. .env.example is the template.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# AWS CDK
+infrastructure/cdk.out/
+infrastructure/cdk.context.json
+.aws-sam/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*

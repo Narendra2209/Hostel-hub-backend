@@ -1,0 +1,1429 @@
+{
+  "$comment": "HISTORICAL DATA - the August 2026 register of the original single-file application. It is imported once by scripts/import-legacy-data.ts and then lives in MongoDB. Amounts here are in RUPEES; the importer converts them to the integer paise the database stores. No application code may ever read this file or reference the values in it.",
+  "sourceMonth": "2026-08",
+  "buildings": [
+    {
+      "key": "sbi",
+      "name": "SBI Building",
+      "code": "SBI",
+      "sortOrder": 10
+    },
+    {
+      "key": "old",
+      "name": "Old Building",
+      "code": "OLD",
+      "sortOrder": 20
+    },
+    {
+      "key": "suripudi",
+      "name": "Suripudi",
+      "code": "SUR",
+      "sortOrder": 30
+    }
+  ],
+  "residents": [
+    {
+      "building": "sbi",
+      "name": "A. Srinivas Chary",
+      "monthlyFee": 4500,
+      "dueDay": 28,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "M. Venkat",
+      "monthlyFee": 4500,
+      "dueDay": 27,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 3500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "K. Balaji",
+      "monthlyFee": 3000,
+      "dueDay": 29,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 3000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "D. Chandhu Naik",
+      "monthlyFee": 4500,
+      "dueDay": 31,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "G. Naga Sai",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "M. Prasad",
+      "monthlyFee": 4500,
+      "dueDay": 31,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "K. Anil Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "M. Seshi Kumar",
+      "monthlyFee": 4200,
+      "dueDay": 31,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4200,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "P. Siva",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "P. Aravind",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "G. Vijay Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "G. Srinu",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "Ch. Varaprasad",
+      "monthlyFee": 4500,
+      "dueDay": 4,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 3950,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "N. Rakesh",
+      "monthlyFee": 4500,
+      "dueDay": 3,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "D. Sathis Naik",
+      "monthlyFee": 3000,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": null
+    },
+    {
+      "building": "sbi",
+      "name": "K. Shashishekhar",
+      "monthlyFee": 4500,
+      "dueDay": 5,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "Y. Harshavardhan",
+      "monthlyFee": 5000,
+      "dueDay": 7,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "D. Sai Kumar",
+      "monthlyFee": 4200,
+      "dueDay": 8,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 2000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "P. Sri Lakshmi Narayan",
+      "monthlyFee": 4000,
+      "dueDay": 8,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "Ch. Sujanth",
+      "monthlyFee": 4300,
+      "dueDay": 9,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4300,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "A. Manikanta",
+      "monthlyFee": 4300,
+      "dueDay": 9,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4300,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "SK. Ummar",
+      "monthlyFee": 4500,
+      "dueDay": 9,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "Y. Sudharsan",
+      "monthlyFee": 4500,
+      "dueDay": 10,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "K. Akhilesh",
+      "monthlyFee": 5000,
+      "dueDay": 10,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "P. Gopi",
+      "monthlyFee": 4500,
+      "dueDay": 10,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "B. Pavan",
+      "monthlyFee": 4500,
+      "dueDay": 14,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "D. Manikanta Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 13,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "B. Lokesh",
+      "monthlyFee": 4500,
+      "dueDay": 9,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 3000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "B. Siva Kiran",
+      "monthlyFee": 4500,
+      "dueDay": 16,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "P. Rajesh",
+      "monthlyFee": 4500,
+      "dueDay": 16,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "sbi",
+      "name": "A. Sivarama Krishna",
+      "monthlyFee": 4500,
+      "dueDay": 16,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "old",
+      "name": "B. Anji Nayak",
+      "monthlyFee": 4300,
+      "dueDay": 28,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4300,
+        "date": "2026-08-05"
+      }
+    },
+    {
+      "building": "old",
+      "name": "D. Vijay Sathya Narayana",
+      "monthlyFee": 4000,
+      "dueDay": 3,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-11"
+      }
+    },
+    {
+      "building": "old",
+      "name": "P. Srinu",
+      "monthlyFee": 4000,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-13"
+      }
+    },
+    {
+      "building": "old",
+      "name": "M. Siva Nagaraju",
+      "monthlyFee": 4000,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-03"
+      }
+    },
+    {
+      "building": "old",
+      "name": "T. Venkata Mahesh",
+      "monthlyFee": 4000,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-03"
+      }
+    },
+    {
+      "building": "old",
+      "name": "M. Shankar",
+      "monthlyFee": 4000,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-03"
+      }
+    },
+    {
+      "building": "old",
+      "name": "P. Naga Venkata Praveen",
+      "monthlyFee": 4000,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-04"
+      }
+    },
+    {
+      "building": "old",
+      "name": "Ch. Dhanesh Kumar",
+      "monthlyFee": 4000,
+      "dueDay": 3,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-08"
+      }
+    },
+    {
+      "building": "old",
+      "name": "Kishore",
+      "monthlyFee": 4000,
+      "dueDay": 4,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-07"
+      }
+    },
+    {
+      "building": "old",
+      "name": "S. Hari Krishna",
+      "monthlyFee": 4000,
+      "dueDay": 4,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-05"
+      }
+    },
+    {
+      "building": "old",
+      "name": "G. Agasthya Sai",
+      "monthlyFee": 4300,
+      "dueDay": 5,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4300,
+        "date": "2026-08-06"
+      }
+    },
+    {
+      "building": "old",
+      "name": "B. Mohana Rao",
+      "monthlyFee": 4000,
+      "dueDay": 5,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-09"
+      }
+    },
+    {
+      "building": "old",
+      "name": "V. Praveen Varma",
+      "monthlyFee": 4000,
+      "dueDay": 5,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-17"
+      }
+    },
+    {
+      "building": "old",
+      "name": "P. Venkat",
+      "monthlyFee": 4000,
+      "dueDay": 6,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": null
+    },
+    {
+      "building": "old",
+      "name": "N. Koteswar Rao",
+      "monthlyFee": 4000,
+      "dueDay": 8,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": null
+    },
+    {
+      "building": "old",
+      "name": "P. Nagarjun Reddy",
+      "monthlyFee": 4000,
+      "dueDay": 7,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-11"
+      }
+    },
+    {
+      "building": "old",
+      "name": "K. Mohan Reddy",
+      "monthlyFee": 4000,
+      "dueDay": 7,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-08"
+      }
+    },
+    {
+      "building": "old",
+      "name": "K. Srihari",
+      "monthlyFee": 4000,
+      "dueDay": 10,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-11"
+      }
+    },
+    {
+      "building": "old",
+      "name": "K. Chandrasekhar",
+      "monthlyFee": 4000,
+      "dueDay": 14,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-15"
+      }
+    },
+    {
+      "building": "old",
+      "name": "SK. Hussain",
+      "monthlyFee": 4000,
+      "dueDay": 16,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-17"
+      }
+    },
+    {
+      "building": "old",
+      "name": "Subhamsa (mess card)",
+      "monthlyFee": 3000,
+      "dueDay": 16,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 3000,
+        "date": "2026-08-12"
+      }
+    },
+    {
+      "building": "old",
+      "name": "V. Rohith Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 23,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-24"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "G. Sri Harish",
+      "monthlyFee": 5000,
+      "dueDay": 28,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-05"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "N. Rajesh",
+      "monthlyFee": 4500,
+      "dueDay": 28,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-03"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "SK. Addas Ali",
+      "monthlyFee": 4500,
+      "dueDay": 27,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-20"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "P. Ganesh Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 31,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-05"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "D. Durga Prasad",
+      "monthlyFee": 5000,
+      "dueDay": 31,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-04"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "G. Udhyeswar",
+      "monthlyFee": 4000,
+      "dueDay": 4,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4000,
+        "date": "2026-08-05"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "V. Srinu",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-02"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "K. Surya",
+      "monthlyFee": 4500,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-07"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "M. Jevan Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-04"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "Venu Gopal",
+      "monthlyFee": 4500,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-06"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "K. Pavan Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 2,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-05"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "G. Anand Babu",
+      "monthlyFee": 5000,
+      "dueDay": 3,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-04"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "G. Venkatesh",
+      "monthlyFee": 4500,
+      "dueDay": 1,
+      "joinMonth": "2026-08",
+      "vacatedMonth": "2026-08",
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-06"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "D. Aswin Babu",
+      "monthlyFee": 4500,
+      "dueDay": 7,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-09"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "P. Raju",
+      "monthlyFee": 4500,
+      "dueDay": 8,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-20"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "J. Syamul",
+      "monthlyFee": 4500,
+      "dueDay": 8,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-19"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "M. Nageswara Rao",
+      "monthlyFee": 4500,
+      "dueDay": 8,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-19"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "Y. Rajesh",
+      "monthlyFee": 4500,
+      "dueDay": 9,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-11"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "H. Santhosh",
+      "monthlyFee": 4500,
+      "dueDay": 13,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-29"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "B. Chaythanya Naik",
+      "monthlyFee": 4500,
+      "dueDay": 15,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-25"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "P. Adhiseshu",
+      "monthlyFee": 5000,
+      "dueDay": 16,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-17"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "D. Gyaneswar",
+      "monthlyFee": 5000,
+      "dueDay": 17,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": null
+    },
+    {
+      "building": "suripudi",
+      "name": "B. Yugandhar",
+      "monthlyFee": 4500,
+      "dueDay": 17,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 4500,
+        "date": "2026-08-20"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "R. Dilp Kumar",
+      "monthlyFee": 4500,
+      "dueDay": 20,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": null
+    },
+    {
+      "building": "suripudi",
+      "name": "T. Lakshmi Narayan",
+      "monthlyFee": 5000,
+      "dueDay": 21,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-29"
+      }
+    },
+    {
+      "building": "suripudi",
+      "name": "D. Sai Kiran",
+      "monthlyFee": 4500,
+      "dueDay": 21,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": null
+    },
+    {
+      "building": "suripudi",
+      "name": "T. Chinababu",
+      "monthlyFee": 5000,
+      "dueDay": 22,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": null
+    },
+    {
+      "building": "suripudi",
+      "name": "M. Suresh",
+      "monthlyFee": 5000,
+      "dueDay": 22,
+      "joinMonth": "2026-08",
+      "vacatedMonth": null,
+      "payment": {
+        "amount": 5000,
+        "date": "2026-08-23"
+      }
+    }
+  ],
+  "staff": [
+    {
+      "name": "Urmila",
+      "role": "Kitchen",
+      "building": null,
+      "monthlySalary": 5000,
+      "joinMonth": "2026-08"
+    },
+    {
+      "name": "Scavenger",
+      "role": "Cleaning",
+      "building": null,
+      "monthlySalary": 3000,
+      "joinMonth": "2026-08"
+    }
+  ],
+  "salaryPayments": [
+    {
+      "staff": "Urmila",
+      "salaryMonth": "2026-08",
+      "amount": 5000,
+      "date": "2026-08-08"
+    },
+    {
+      "staff": "Scavenger",
+      "salaryMonth": "2026-08",
+      "amount": 3000,
+      "date": "2026-08-08"
+    }
+  ],
+  "expenses": [
+    {
+      "date": "2026-08-01",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 11000,
+      "note": "Telugu entry, qty 2"
+    },
+    {
+      "date": "2026-08-01",
+      "building": null,
+      "category": "Gas / LPG",
+      "amount": 1000,
+      "note": "Cylinder"
+    },
+    {
+      "date": "2026-08-02",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1350,
+      "note": "Telugu entry, 6 kg"
+    },
+    {
+      "date": "2026-08-02",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 120,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-03",
+      "building": null,
+      "category": "Internet",
+      "amount": 589,
+      "note": "Wifi"
+    },
+    {
+      "date": "2026-08-03",
+      "building": "suripudi",
+      "category": "Building rent",
+      "amount": 32700,
+      "note": "Suripudi rent"
+    },
+    {
+      "date": "2026-08-03",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 550,
+      "note": "Veg"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Water",
+      "amount": 428,
+      "note": "Water"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 3534,
+      "note": "Curd"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Gas / LPG",
+      "amount": 1010,
+      "note": "Gas"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Other",
+      "amount": 5000,
+      "note": "Murthy"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 190,
+      "note": "Veg"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 3900,
+      "note": "D-Mart"
+    },
+    {
+      "date": "2026-08-04",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 3720,
+      "note": "Patnam bazar"
+    },
+    {
+      "date": "2026-08-04",
+      "building": "sbi",
+      "category": "Building rent",
+      "amount": 40000,
+      "note": "SBI rent"
+    },
+    {
+      "date": "2026-08-08",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1800,
+      "note": "Veg"
+    },
+    {
+      "date": "2026-08-08",
+      "building": "old",
+      "category": "Building rent",
+      "amount": 40000,
+      "note": "Old building rent"
+    },
+    {
+      "date": "2026-08-08",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 5000,
+      "note": "Chapathi"
+    },
+    {
+      "date": "2026-08-09",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 6062,
+      "note": "D-Mart"
+    },
+    {
+      "date": "2026-08-09",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1350,
+      "note": "Chicken"
+    },
+    {
+      "date": "2026-08-10",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1200,
+      "note": "Onions"
+    },
+    {
+      "date": "2026-08-12",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 518,
+      "note": "Eggs"
+    },
+    {
+      "date": "2026-08-12",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 1000,
+      "note": "Kitchen ware repair"
+    },
+    {
+      "date": "2026-08-12",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 2070,
+      "note": "Water motor repair"
+    },
+    {
+      "date": "2026-08-12",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 180,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-13",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 400,
+      "note": "Chemical"
+    },
+    {
+      "date": "2026-08-13",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 5000,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-14",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 500,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-16",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1500,
+      "note": "Chicken 6 kg"
+    },
+    {
+      "date": "2026-08-16",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 100,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-16",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 2000,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-17",
+      "building": null,
+      "category": "Other",
+      "amount": 6000,
+      "note": "Murthy"
+    },
+    {
+      "date": "2026-08-17",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 600,
+      "note": "Vegetables"
+    },
+    {
+      "date": "2026-08-18",
+      "building": null,
+      "category": "Gas / LPG",
+      "amount": 1000,
+      "note": "Cylinder - Bharat"
+    },
+    {
+      "date": "2026-08-18",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 300,
+      "note": "Labour"
+    },
+    {
+      "date": "2026-08-19",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 3000,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-19",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 50,
+      "note": "Dishwash"
+    },
+    {
+      "date": "2026-08-19",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 490,
+      "note": "Eggs (90)"
+    },
+    {
+      "date": "2026-08-19",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 600,
+      "note": "Vegetables"
+    },
+    {
+      "date": "2026-08-20",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 2000,
+      "note": "Latrine wash"
+    },
+    {
+      "date": "2026-08-21",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 400,
+      "note": "Eggs (75)"
+    },
+    {
+      "date": "2026-08-21",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 600,
+      "note": "Vegetables"
+    },
+    {
+      "date": "2026-08-22",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 600,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-22",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1000,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-22",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1000,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-22",
+      "building": null,
+      "category": "Maintenance",
+      "amount": 150,
+      "note": "Corridor bulb"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 1140,
+      "note": "Chicken 6 kg"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Other",
+      "amount": 3000,
+      "note": "Murthy"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 5000,
+      "note": "Provisions"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 600,
+      "note": "Vegetables"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 200,
+      "note": "Telugu entry, 5 kg"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 3000,
+      "note": "Wood"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 560,
+      "note": "Vegetables"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 2350,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 2100,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-25",
+      "building": null,
+      "category": "Other",
+      "amount": 120,
+      "note": "Telugu entry, qty 2"
+    },
+    {
+      "date": "2026-08-26",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 500,
+      "note": "Eggs (90)"
+    },
+    {
+      "date": "2026-08-27",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 120,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-28",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 30,
+      "note": "Telugu entry"
+    },
+    {
+      "date": "2026-08-28",
+      "building": null,
+      "category": "Mess / groceries",
+      "amount": 500,
+      "note": "Vegetables"
+    }
+  ]
+}
